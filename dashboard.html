@@ -3,239 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AndesChain | Dashboard de Trazabilidad FAO</title>
+    <title>AndesChain | Trazabilidad Certificada</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .glass-panel { background: white; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-radius: 12px; }
-        .loading-skeleton { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; background-color: #e5e7eb; color: transparent; border-radius: 4px; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .glass-panel { background: white; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); border-radius: 16px; }
+        .loading { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; background-color: #f1f5f9; color: transparent !important; border-radius: 4px; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        .status-dot { height: 8px; width: 8px; background-color: #22c55e; border-radius: 50%; display: inline-block; box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2); }
     </style>
 </head>
-<body class="text-gray-800">
+<body class="text-slate-800">
 
-    <nav class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-3">
-            <div class="bg-green-600 text-white p-2 rounded-lg font-bold text-xl">AC</div>
-            <div>
-                <h1 class="font-bold text-lg leading-tight">AndesChain</h1>
-                <p class="text-xs text-gray-500 tracking-wider">NETWORK</p>
+    <nav class="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-slate-900 text-white p-2 rounded-lg font-bold text-lg tracking-tighter">AC</div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-slate-900">AndesChain</h1>
+                    <p class="text-[10px] text-slate-500 font-semibold tracking-widest uppercase">Verified Network</p>
+                </div>
             </div>
-        </div>
-        <div class="flex items-center gap-4">
-            <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full border border-green-200">
-                <i class="fas fa-satellite-dish mr-1"></i> POLYGON MAINNET
-            </span>
-            <span class="text-sm text-gray-500">Lote ID: #001</span>
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 text-xs font-bold rounded-full border border-green-200">
+                    <span class="status-dot animate-pulse"></span>
+                    POLYGON MAINNET
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
             <div>
-                <p class="text-sm font-semibold text-green-600 uppercase tracking-wide mb-1">Certificado de Origen Digital</p>
-                <h2 id="marca" class="text-4xl font-extrabold text-gray-900 loading-skeleton w-64 h-10 mb-2">Cargando...</h2>
-                <div class="flex gap-2 mt-2">
-                    <span id="variedad" class="px-3 py-1 bg-gray-100 text-gray-600 text-sm font-medium rounded-md loading-skeleton w-32">...</span>
-                    <span id="cultivo" class="px-3 py-1 bg-blue-50 text-blue-700 text-sm font-medium rounded-md border border-blue-100 loading-skeleton w-24">...</span>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wide">Lote #001</span>
+                    <span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wide">Certificado</span>
+                </div>
+                <h2 id="marca" class="text-4xl md:text-5xl font-extrabold text-slate-900 mb-2 loading w-64 h-12">Cargando...</h2>
+                <div class="flex flex-wrap gap-3 mt-3">
+                    <div id="producto-badge" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-md shadow-sm">
+                        <i class="fas fa-carrot text-orange-500"></i>
+                        <span id="producto" class="text-sm font-semibold text-slate-700 loading w-20">...</span>
+                    </div>
+                    <div id="variedad-badge" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 rounded-md shadow-sm">
+                        <i class="fas fa-tag text-slate-400"></i>
+                        <span id="variedad" class="text-sm font-medium text-slate-600 loading w-24">...</span>
+                    </div>
                 </div>
             </div>
-            <div class="text-right">
-                <button onclick="window.print()" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 transition shadow-sm">
-                    <i class="fas fa-download mr-2"></i> Exportar PDF
-                </button>
+            
+            <div class="flex gap-3">
+                <a id="btn-evidencia" href="#" target="_blank" class="bg-slate-900 hover:bg-slate-800 text-white px-5 py-3 rounded-xl text-sm font-bold transition shadow-lg flex items-center gap-2 opacity-50 pointer-events-none">
+                    <i class="fas fa-camera"></i> Ver Evidencia
+                </a>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-            <div class="lg:col-span-1 space-y-6">
+            <div class="lg:col-span-4 space-y-6">
+                
                 <div class="glass-panel p-6">
-                    <h3 class="text-gray-500 text-xs font-bold uppercase mb-4 tracking-wider">Productor Responsable</h3>
+                    <h3 class="text-slate-400 text-xs font-bold uppercase mb-4 tracking-wider">Responsable del Cultivo</h3>
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-xl">
-                            <i class="fas fa-user-check"></i>
+                        <div class="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 text-2xl border border-slate-200">
+                            <i class="fas fa-user-friends"></i>
                         </div>
                         <div>
-                            <p id="agricultor" class="font-bold text-lg loading-skeleton w-40 h-6">...</p>
-                            <p class="text-sm text-gray-500">ID Verificado</p>
-                        </div>
-                    </div>
-                    <div class="mt-6 border-t border-gray-100 pt-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-sm text-gray-600">Cumplimiento Normativo</span>
-                            <span class="text-sm font-bold text-green-600">100%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-green-600 h-2 rounded-full" style="width: 100%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-panel p-6 bg-slate-900 text-white border-none">
-                    <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Blockchain Audit</h3>
-                        <i class="fas fa-shield-alt text-green-400"></i>
-                    </div>
-                    <div class="space-y-4">
-                        <div>
-                            <p class="text-xs text-slate-500">Contract Address</p>
-                            <p class="font-mono text-xs text-slate-300 break-all">0x34fe41bd7a2a34597bd098f29e2256b86ca60611</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-500">Estado</p>
-                            <div class="flex items-center gap-2 mt-1">
-                                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                <p class="text-sm font-bold text-green-400">Inmutable</p>
+                            <p id="agricultor" class="font-bold text-xl text-slate-800 loading w-40 h-6 mb-1">...</p>
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-check-circle text-green-500 text-xs"></i>
+                                <p class="text-xs text-slate-500 font-medium">Identidad Verificada</p>
                             </div>
                         </div>
-                        <a href="https://polygonscan.com/address/0x34fe41bd7a2a34597bd098f29e2256b86ca60611" target="_blank" class="block text-center w-full py-2 bg-slate-800 hover:bg-slate-700 rounded text-xs text-slate-300 transition">
-                            Ver en Explorador (PolygonScan)
-                        </a>
+                    </div>
+                    <div class="mt-6 pt-4 border-t border-slate-100">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-xs font-semibold text-slate-500">Tipo de Cultivo</span>
+                            <span id="cultivo" class="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded loading w-20">...</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="lg:col-span-2 space-y-6">
-                <div class="glass-panel overflow-hidden">
-                    <div class="p-6 border-b border-gray-100 flex justify-between items-center">
-                        <h3 class="text-gray-500 text-xs font-bold uppercase tracking-wider">Origen Georreferenciado</h3>
-                        <span id="coords-text" class="text-xs font-mono bg-gray-100 px-2 py-1 rounded">...</span>
+                <div class="glass-panel p-6 bg-slate-900 text-white border-slate-800">
+                    <div class="flex justify-between items-start mb-6">
+                        <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Auditoría Blockchain</h3>
+                        <i class="fas fa-shield-alt text-emerald-400 text-lg"></i>
                     </div>
                     
-                    <div class="h-64 bg-gray-200 relative w-full">
-                        <iframe id="mapa-frame" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    <div class="space-y-5">
+                        <div>
+                            <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Contract Address</p>
+                            <div class="flex items-center gap-2 bg-slate-800 p-2 rounded border border-slate-700">
+                                <code class="text-xs font-mono text-emerald-400 break-all">0x34fe41bd7a2a34597bd098f29e2256b86ca60611</code>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Network</p>
+                                <p class="text-sm font-semibold text-white">Polygon PoS</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-400 uppercase font-bold mb-1">Estado</p>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                                    <p class="text-sm font-semibold text-white">Inmutable</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <a href="https://polygonscan.com/address/0x34fe41bd7a2a34597bd098f29e2256b86ca60611" target="_blank" class="block w-full text-center py-2.5 bg-white text-slate-900 rounded-lg text-xs font-bold hover:bg-slate-200 transition">
+                            Verificar en Explorador Oficial <i class="fas fa-external-link-alt ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="console-log" class="hidden p-4 bg-red-50 border border-red-200 rounded-lg text-xs font-mono text-red-600 break-words"></div>
+            </div>
+
+            <div class="lg:col-span-8 space-y-6">
+                
+                <div class="glass-panel overflow-hidden">
+                    <div class="p-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-map-marker-alt text-red-500"></i>
+                            <h3 class="text-slate-600 text-xs font-bold uppercase tracking-wider">Georreferenciación</h3>
+                        </div>
+                        <span id="coords-text" class="text-[10px] font-mono text-slate-400 bg-white px-2 py-1 rounded border border-slate-200">Waiting for GPS...</span>
+                    </div>
+                    
+                    <div class="relative h-64 md:h-80 bg-slate-200 w-full group">
+                        <iframe id="mapa-frame" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition duration-700" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                        <div id="map-loading" class="absolute inset-0 flex items-center justify-center bg-slate-100 z-10">
+                            <p class="text-xs text-slate-400 animate-pulse">Cargando Satélite...</p>
+                        </div>
                     </div>
 
-                    <div class="p-6 bg-gray-50 flex justify-between items-center">
-                        <div>
-                            <p id="predio" class="font-bold text-gray-800">...</p>
-                            <p id="zona" class="text-sm text-gray-500">...</p>
+                    <div class="p-5 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div class="text-center md:text-left">
+                            <p id="predio" class="font-bold text-slate-800 loading w-48 h-5 mb-1 mx-auto md:mx-0">...</p>
+                            <p id="zona" class="text-sm text-slate-500 loading w-32 h-4 mx-auto md:mx-0">...</p>
                         </div>
-                        <a id="btn-evidencia" href="#" target="_blank" class="flex items-center gap-2 bg-white border border-gray-300 px-4 py-2 rounded-lg text-sm hover:text-green-600 hover:border-green-600 transition">
-                            <i class="fas fa-folder-open"></i>
-                            <span>Ver Evidencia Digital</span>
+                        <a id="link-gmaps" href="#" target="_blank" class="text-blue-600 text-xs font-bold hover:underline flex items-center gap-1 opacity-50 pointer-events-none">
+                            Abrir en Google Maps <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
                 </div>
 
                 <div class="glass-panel p-6">
-                    <h3 class="text-gray-500 text-xs font-bold uppercase mb-4 tracking-wider">Ciclo Fenológico (Tiempos)</h3>
-                    <div class="flex items-center gap-8">
-                        <div class="w-1/3">
-                            <div class="mb-4">
-                                <p class="text-xs text-gray-400">Fecha Siembra</p>
-                                <p id="fecha-siembra" class="font-bold text-gray-800">...</p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400">Fecha Cosecha</p>
-                                <p id="fecha-cosecha" class="font-bold text-green-700">...</p>
+                    <div class="flex flex-col md:flex-row gap-8 items-center">
+                        <div class="w-full md:w-1/2 space-y-6">
+                            <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-4">Ciclo Fenológico</h3>
+                            
+                            <div class="relative pl-6 border-l-2 border-slate-200 space-y-8">
+                                <div class="relative">
+                                    <span class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-white border-2 border-slate-300"></span>
+                                    <p class="text-xs text-slate-400 uppercase font-semibold">Fecha Siembra</p>
+                                    <p id="fecha-siembra" class="font-bold text-slate-700 text-lg loading w-32 h-6">...</p>
+                                </div>
+                                <div class="relative">
+                                    <span class="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-green-500 border-2 border-green-500 shadow-[0_0_0_4px_rgba(34,197,94,0.2)]"></span>
+                                    <p class="text-xs text-green-600 uppercase font-semibold">Fecha Cosecha</p>
+                                    <p id="fecha-cosecha" class="font-bold text-slate-800 text-lg loading w-32 h-6">...</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="w-2/3 h-40">
-                            <canvas id="myChart"></canvas>
+
+                        <div class="w-full md:w-1/2 h-48 relative">
+                            <canvas id="cropChart"></canvas>
                         </div>
                     </div>
                 </div>
-            </div>
 
+            </div>
         </div>
-
-        <footer class="mt-12 border-t border-gray-200 pt-8 text-center">
-            <p class="text-sm text-gray-400">Desarrollado con tecnología <strong class="text-gray-600">AndesChain</strong> para la trazabilidad agrícola transparente.</p>
-            <div class="flex justify-center gap-4 mt-4 opacity-50 grayscale hover:grayscale-0 transition duration-500">
-                <i class="fab fa-ethereum text-2xl"></i>
-                <i class="fas fa-leaf text-2xl"></i>
-                <i class="fas fa-globe-americas text-2xl"></i>
-            </div>
+        
+        <footer class="mt-12 text-center border-t border-slate-200 pt-8 pb-4">
+            <p class="text-xs text-slate-400">Tecnología Blockchain auditada por <span class="font-bold text-slate-600">AndesChain</span> para la FAO.</p>
         </footer>
 
     </div>
 
     <script>
-        const contractAddress = "0x34fe41bd7a2a34597bd098f29e2256b86ca60611";
-        const loteId = 1;
-
-        // Lista de Nodos Robustos
-        const NODOS = [
-            "https://polygon-bor.publicnode.com",
-            "https://polygon-rpc.com", 
-            "https://1rpc.io/matic"
+        // 1. LISTA DE NODOS (Si uno falla, usa el siguiente)
+        const RPC_NODES = [
+            "https://polygon-bor.publicnode.com",   // Opción 1 (Muy estable)
+            "https://polygon-rpc.com",              // Opción 2 (Oficial)
+            "https://1rpc.io/matic",                // Opción 3 (Privacidad)
+            "https://rpc-mainnet.matic.network",    // Opción 4 (Backup)
+            "https://matic-mainnet.chainstacklabs.com" // Opción 5
         ];
 
-        async function initDashboard() {
-            let datos = null;
+        const CONTRACT_ADDRESS = "0x34fe41bd7a2a34597bd098f29e2256b86ca60611";
+        const LOTE_ID = 1;
 
-            // 1. Obtener Datos (Conexión Resiliente)
-            for (let nodo of NODOS) {
+        async function initApp() {
+            logDebug("Iniciando sistema AndesChain...");
+            
+            let provider = null;
+            let connected = false;
+
+            // 2. INTENTO DE CONEXIÓN EN BUCLE
+            for (let i = 0; i < RPC_NODES.length; i++) {
+                const nodeUrl = RPC_NODES[i];
                 try {
-                    const provider = new ethers.providers.JsonRpcProvider(nodo);
-                    const contrato = new ethers.Contract(contractAddress, ["function getLoteData(uint256) view returns (string)"], provider);
-                    const respuesta = await contrato.getLoteData(loteId);
-                    datos = JSON.parse(respuesta);
-                    break; // Si funciona, salimos del bucle
+                    logDebug(`Intentando nodo ${i+1}: ${nodeUrl}`);
+                    
+                    // Configurar proveedor con timeout corto (3 segundos) para no esperar eterno
+                    const tempProvider = new ethers.providers.JsonRpcProvider({
+                        url: nodeUrl,
+                        timeout: 3000
+                    });
+
+                    // Prueba rápida de vida (ping)
+                    await tempProvider.getNetwork();
+                    
+                    // Si pasa el ping, este es nuestro proveedor
+                    provider = tempProvider;
+                    connected = true;
+                    logDebug("✅ Conexión exitosa con: " + nodeUrl);
+                    break; // Salimos del bucle
                 } catch (e) {
-                    console.log("Reintentando con otro nodo...");
+                    logDebug(`❌ Falló nodo ${i+1}. Buscando siguiente...`);
                 }
             }
 
-            if (!datos) {
-                alert("Error de conexión con Blockchain. Intente recargar.");
+            if (!connected) {
+                showError("No se pudo conectar a la Blockchain. Revisa tu internet o intenta más tarde.");
                 return;
             }
 
-            // 2. Poblar Datos de Texto
-            document.getElementById("marca").innerText = datos.marca;
-            document.getElementById("marca").classList.remove("loading-skeleton", "text-transparent");
-            
-            document.getElementById("producto").innerText = datos.producto; // Nota: Agregué un ID oculto en el HTML si quisieras usarlo, pero usé marca arriba
-            document.getElementById("variedad").innerText = datos.variedad;
-            document.getElementById("variedad").classList.remove("loading-skeleton");
-            
-            document.getElementById("cultivo").innerText = datos.tipo_cultivo;
-            document.getElementById("cultivo").classList.remove("loading-skeleton");
+            // 3. DESCARGAR DATOS
+            try {
+                const abi = ["function getLoteData(uint256) view returns (string)"];
+                const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, provider);
+                
+                logDebug("Descargando contrato...");
+                const dataRaw = await contract.getLoteData(LOTE_ID);
+                const data = JSON.parse(dataRaw);
+                
+                renderData(data);
 
-            document.getElementById("agricultor").innerText = datos.agricultores;
-            document.getElementById("agricultor").classList.remove("loading-skeleton");
+            } catch (e) {
+                showError("Error leyendo datos del contrato: " + e.message);
+            }
+        }
 
-            document.getElementById("fecha-siembra").innerText = datos.fechas.siembra;
-            document.getElementById("fecha-cosecha").innerText = datos.fechas.cosecha;
-            
-            document.getElementById("predio").innerText = datos.origen.predio;
-            document.getElementById("zona").innerText = datos.origen.zona;
-            document.getElementById("coords-text").innerText = datos.origen.coords;
+        function renderData(data) {
+            // Eliminar esqueletos de carga
+            document.querySelectorAll('.loading').forEach(el => el.classList.remove('loading', 'text-transparent'));
+            document.querySelectorAll('.opacity-50').forEach(el => el.classList.remove('opacity-50', 'pointer-events-none'));
 
-            document.getElementById("btn-evidencia").href = datos.evidencia;
+            // Inyectar Textos
+            setText("marca", data.marca);
+            setText("producto", data.producto);
+            setText("variedad", data.variedad);
+            setText("agricultor", data.agricultores);
+            setText("cultivo", data.tipo_cultivo);
+            setText("fecha-siembra", data.fechas.siembra);
+            setText("fecha-cosecha", data.fechas.cosecha);
+            setText("predio", data.origen.predio);
+            setText("zona", data.origen.zona);
+            setText("coords-text", data.origen.coords);
 
-            // 3. MAPA INTELIGENTE (Google Maps Embed)
-            // Limpiamos las coordenadas para el link (quitamos espacios)
-            const coordsLimpia = datos.origen.coords.replace(/\s/g, ''); 
-            const mapUrl = `https://maps.google.com/maps?q=${coordsLimpia}&t=k&z=17&ie=UTF8&iwloc=&output=embed`;
-            document.getElementById("mapa-frame").src = mapUrl;
+            // Inyectar Links
+            document.getElementById("btn-evidencia").href = data.evidencia;
+            document.getElementById("link-gmaps").href = data.origen.gmaps;
 
+            // Inyectar Mapa
+            const cleanCoords = data.origen.coords.replace(/\s/g, '');
+            const mapSrc = `https://maps.google.com/maps?q=${cleanCoords}&t=k&z=17&ie=UTF8&iwloc=&output=embed`;
+            document.getElementById("mapa-frame").src = mapSrc;
+            document.getElementById("map-loading").style.display = 'none';
 
-            // 4. GRÁFICA POTENTE (Chart.js)
-            // Simulamos datos de días para el gráfico basado en las fechas
-            const ctx = document.getElementById('myChart').getContext('2d');
+            // Iniciar Gráfico
+            initChart();
+        }
+
+        function setText(id, text) {
+            const el = document.getElementById(id);
+            if(el) el.innerText = text;
+        }
+
+        function logDebug(msg) {
+            console.log(msg);
+        }
+
+        function showError(msg) {
+            const consoleDiv = document.getElementById("console-log");
+            consoleDiv.classList.remove("hidden");
+            consoleDiv.innerText = "ERROR CRÍTICO: " + msg + "\n\n(Si estás abriendo el archivo localmente, usa GitHub Pages)";
+            document.getElementById("marca").innerText = "Error de Conexión";
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('cropChart').getContext('2d');
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Días Crecimiento', 'Días Post-Cosecha', 'Transporte'],
+                    labels: ['Crecimiento', 'Cosecha/Proceso', 'Logística'],
                     datasets: [{
-                        label: 'Ciclo de Vida',
-                        data: [120, 15, 5], // Datos simulados para demo visual
-                        backgroundColor: [
-                            '#16a34a', // Verde (Crecimiento)
-                            '#fbbf24', // Amarillo (Almacenaje)
-                            '#3b82f6'  // Azul (Transporte)
-                        ],
+                        data: [75, 15, 10],
+                        backgroundColor: ['#22c55e', '#f59e0b', '#3b82f6'],
                         borderWidth: 0,
                         hoverOffset: 4
                     }]
@@ -244,14 +323,15 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8 } }
+                        legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: {family: "'Inter', sans-serif"} } }
                     }
                 }
             });
         }
 
-        // Ejecutar
-        window.onload = initDashboard;
+        // Arrancar al cargar
+        window.addEventListener('load', initApp);
+
     </script>
 </body>
 </html>
