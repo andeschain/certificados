@@ -1,0 +1,122 @@
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+<style>
+  body { background-color: #f3f4f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: sans-serif; }
+  .card { background: white; width: 100%; max-width: 400px; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 8px solid #16a34a; }
+  .hide { display: none; }
+</style>
+
+<div class="card">
+  
+  <div class="p-6 text-center bg-green-50" style="padding: 20px; background: #f0fdf4; text-align: center;">
+    <h1 id="marca" class="text-2xl font-bold text-green-800">
+      <i class="fas fa-spinner fa-spin"></i> Buscando en Blockchain...
+    </h1>
+    <p class="text-xs text-green-600 uppercase font-bold tracking-wider">Certificado Digital</p>
+  </div>
+
+  <div id="contenido" class="p-6 space-y-4" style="padding: 20px;">
+    
+    <div class="flex items-center space-x-3" style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+      <div style="background: #dcfce7; padding: 10px; border-radius: 50%; color: #16a34a;"><i class="fas fa-carrot"></i></div>
+      <div>
+        <p style="font-size: 10px; text-transform: uppercase; color: #6b7280; margin: 0;">Producto</p>
+        <h2 id="producto" style="font-size: 18px; font-weight: bold; margin: 0; color: #1f2937;">...</h2>
+        <p id="variedad" style="font-size: 14px; color: #4b5563; margin: 0;">...</p>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-3" style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+      <div style="background: #dbeafe; padding: 10px; border-radius: 50%; color: #2563eb;"><i class="fas fa-user-friends"></i></div>
+      <div>
+        <p style="font-size: 10px; text-transform: uppercase; color: #6b7280; margin: 0;">Agricultor</p>
+        <p id="agricultor" style="font-size: 16px; font-weight: bold; margin: 0; color: #1f2937;">...</p>
+      </div>
+    </div>
+
+    <div style="border-left: 2px solid #e5e7eb; margin-left: 20px; padding-left: 20px; margin-bottom: 20px;">
+      <div style="margin-bottom: 15px;">
+        <p style="font-size: 10px; color: #6b7280; margin: 0;">Fecha Siembra</p>
+        <p id="siembra" style="font-weight: bold; margin: 0;">...</p>
+      </div>
+      <div>
+        <p style="font-size: 10px; color: #6b7280; margin: 0;">Fecha Cosecha</p>
+        <p id="cosecha" style="font-weight: bold; margin: 0;">...</p>
+      </div>
+    </div>
+
+    <div style="background: #f9fafb; padding: 15px; border-radius: 10px; border: 1px solid #e5e7eb; margin-bottom: 20px;">
+      <p style="font-size: 10px; text-transform: uppercase; color: #6b7280; margin: 0;">Ubicación</p>
+      <p id="predio" style="font-weight: bold; margin: 0; font-size: 14px;">...</p>
+      <a id="link-mapa" href="#" target="_blank" style="color: #2563eb; font-size: 12px; font-weight: bold; text-decoration: none;">Ver Mapa Satelital &rarr;</a>
+    </div>
+
+    <a id="link-evidencia" href="#" target="_blank" style="display: block; width: 100%; background: #16a34a; color: white; text-align: center; padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+      <i class="fas fa-camera"></i> Ver Evidencia
+    </a>
+    
+    <div style="text-align: center; margin-top: 15px; font-size: 10px; color: #9ca3af;">
+      ID Contrato: 0x34fe...0611
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // 1. Configuración
+  const DIRECCION_CONTRATO = "0x34fe41bd7a2a34597bd098f29e2256b86ca60611";
+  const ID_LOTE = 1;
+
+  // 2. Lista de Nodos (Si falla uno, prueba el siguiente)
+  const NODOS = [
+    "https://polygon-bor.publicnode.com",
+    "https://polygon-rpc.com", 
+    "https://rpc-mainnet.matic.network"
+  ];
+
+  async function iniciar() {
+    for (let nodo of NODOS) {
+      try {
+        console.log("Intentando conectar con: " + nodo);
+        
+        // Conectar
+        const provider = new ethers.providers.JsonRpcProvider(nodo);
+        const contrato = new ethers.Contract(DIRECCION_CONTRATO, [
+          "function getLoteData(uint256) view returns (string)"
+        ], provider);
+
+        // Pedir datos
+        const respuesta = await contrato.getLoteData(ID_LOTE);
+        const datos = JSON.parse(respuesta);
+        
+        // Si llegamos aquí, ¡FUNCIONÓ!
+        mostrarDatos(datos);
+        return; // Terminamos
+
+      } catch (error) {
+        console.log("Fallo nodo " + nodo);
+      }
+    }
+    
+    // Si todo falla
+    document.getElementById("marca").innerText = "Error de Red (Recarga)";
+  }
+
+  function mostrarDatos(d) {
+    document.getElementById("marca").innerText = d.marca;
+    document.getElementById("producto").innerText = d.producto;
+    document.getElementById("variedad").innerText = d.variedad;
+    document.getElementById("agricultor").innerText = d.agricultores;
+    document.getElementById("siembra").innerText = d.fechas.siembra;
+    document.getElementById("cosecha").innerText = d.fechas.cosecha;
+    document.getElementById("predio").innerText = d.origen.predio + " (" + d.origen.zona + ")";
+    
+    document.getElementById("link-mapa").href = d.origen.gmaps;
+    document.getElementById("link-evidencia").href = d.evidencia;
+  }
+
+  // Arrancar
+  setTimeout(iniciar, 500);
+</script>
