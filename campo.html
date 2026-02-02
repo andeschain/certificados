@@ -3,124 +3,259 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>App Recolector | AndesChain</title>
+    <title>App Recolector | AndesChain Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #FFFFFF; }
-        /* Inputs estilo Fintual: Grandes, bordes suaves, focus claro */
-        .big-input {
+        body { font-family: 'Inter', sans-serif; background-color: #F9FAFB; color: #111; }
+        
+        /* Inputs estilo "Fintual" */
+        .input-group { margin-bottom: 20px; }
+        .big-label { font-size: 13px; font-weight: 700; color: #6B7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: block; }
+        
+        .big-input, .big-select {
             width: 100%;
-            padding: 18px 20px;
+            padding: 16px 20px;
             font-size: 18px;
             border-radius: 16px;
-            background-color: #F9FAFB;
-            border: 2px solid #F3F4F6;
+            background-color: #FFFFFF;
+            border: 2px solid #E5E7EB;
             outline: none;
             transition: all 0.2s;
-            color: #111;
+            appearance: none; /* Quita estilo default del select */
         }
-        .big-input:focus { border-color: #10B981; background: #fff; }
-        .label { font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 8px; display: block; margin-left: 4px; }
+        .big-input:focus, .big-select:focus { border-color: #10B981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1); }
+        
+        /* Validaciones visuales */
+        .valid { border-color: #10B981; background-color: #ECFDF5; }
+        .invalid { border-color: #EF4444; background-color: #FEF2F2; }
+
+        /* Botón GPS */
+        .gps-btn {
+            background: #EFF6FF; border: 2px solid #DBEAFE; color: #2563EB;
+            font-weight: 700; border-radius: 16px; padding: 16px;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            width: 100%; cursor: pointer; transition: all 0.2s;
+        }
+        .gps-btn.active { background: #10B981; color: white; border-color: #059669; }
+
+        /* Botón Foto */
+        .photo-btn {
+            border: 2px dashed #9CA3AF; border-radius: 16px; padding: 20px;
+            text-align: center; color: #6B7280; cursor: pointer; transition: all 0.2s; background: white;
+        }
+        .photo-btn:hover { border-color: #10B981; color: #10B981; background: #ECFDF5; }
+        
+        /* Botón Final */
+        .submit-btn {
+            width: 100%; background-color: #D1D5DB; color: #9CA3AF;
+            font-weight: 800; font-size: 18px; padding: 20px;
+            border-radius: 20px; border: none; cursor: not-allowed;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .submit-btn.ready {
+            background-color: #111827; color: #FFFFFF; cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        .submit-btn.ready:active { transform: scale(0.98); }
     </style>
 </head>
 <body class="p-6 max-w-md mx-auto min-h-screen flex flex-col">
 
-    <div class="flex justify-between items-center mb-8 pt-4">
-        <h1 class="text-2xl font-extrabold tracking-tight">Nuevo Lote</h1>
-        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-xs">A</div>
+    <header class="flex justify-between items-center mb-6 pt-2">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-tight">Nueva Cosecha</h1>
+            <p class="text-xs text-gray-400 font-medium mt-1">AndesChain Verifier v2.0</p>
+        </div>
+        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 shadow-sm border border-green-200">
+            <i class="fas fa-seedling"></i>
+        </div>
+    </header>
+
+    <div id="validationConsole" class="hidden bg-red-50 border border-red-200 rounded-xl p-4 mb-6 text-xs text-red-600 font-mono">
+        <p class="font-bold mb-1"><i class="fas fa-shield-alt"></i> ALERTA DE SEGURIDAD:</p>
+        <ul id="errorList" class="list-disc pl-4 space-y-1"></ul>
     </div>
 
-    <div class="flex-1 space-y-6">
+    <div class="flex-1">
         
-        <div>
-            <label class="label">¿Qué estás cosechando?</label>
-            <input type="text" class="big-input" placeholder="Ej: Manzanas Fuji" id="prodInput">
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-            <div>
-                <label class="label">Fecha</label>
-                <input type="text" class="big-input text-center" value="Hoy" readonly>
-            </div>
-            <div>
-                <label class="label">Lote ID</label>
-                <input type="text" class="big-input text-center text-gray-400" value="AUTO" readonly>
+        <div class="input-group relative">
+            <label class="big-label">Productor / Predio</label>
+            <select id="productorSelect" class="big-select" onchange="validateForm()">
+                <option value="" disabled selected>Selecciona origen...</option>
+                <option value="paine" data-lat="-33.8" data-lon="-70.7">El Otro Huerto (Paine)</option>
+                <option value="buin" data-lat="-33.7" data-lon="-70.7">Granja El Molino (Buin)</option>
+                <option value="chiloe" data-lat="-42.6" data-lon="-73.9">Cahuala (Chiloé)</option>
+                <option value="valdivia" data-lat="-39.8" data-lon="-73.2">Punta de Fierro (Valdivia)</option>
+            </select>
+            <div class="absolute right-4 top-[42px] pointer-events-none text-gray-400">
+                <i class="fas fa-chevron-down"></i>
             </div>
         </div>
 
-        <div>
-            <label class="label">Ubicación del Huerto</label>
-            <div class="relative">
-                <input type="text" class="big-input pr-12" placeholder="Esperando GPS..." id="gpsInput" readonly>
-                <button onclick="getGPS()" class="absolute right-3 top-3 bg-white p-2 rounded-xl shadow-sm border border-gray-100 text-blue-500 hover:scale-110 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                </button>
+        <div class="grid grid-cols-2 gap-4 input-group">
+            <div>
+                <label class="big-label">Producto</label>
+                <input type="text" id="prodInput" class="big-input" placeholder="Ej: Miel" onkeyup="validateForm()">
             </div>
-            <p class="text-xs text-gray-400 mt-2 ml-2">Presiona el ícono para geolocalizar.</p>
+            <div>
+                <label class="big-label">Variedad</label>
+                <input type="text" id="varInput" class="big-input" placeholder="Ej: Ulmo" onkeyup="validateForm()">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label class="big-label">Geolocalización Segura</label>
+            <button id="gpsBtn" onclick="capturarGPS()" class="gps-btn">
+                <i class="fas fa-satellite-dish"></i>
+                <span id="gpsText">Validar Ubicación GPS</span>
+            </button>
+            <input type="hidden" id="gpsData">
+            <p class="text-[10px] text-gray-400 mt-2 text-center" id="gpsStatus">Se comparará el GPS con el polígono del predio.</p>
+        </div>
+
+        <div class="input-group">
+            <label class="big-label">Evidencia del Lote</label>
+            <label class="photo-btn flex flex-col items-center justify-center h-32 relative overflow-hidden" id="photoLabel">
+                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="handlePhoto(this)">
+                
+                <div id="photoPlaceholder" class="flex flex-col items-center">
+                    <i class="fas fa-camera text-2xl mb-2"></i>
+                    <span class="text-sm font-bold">Tomar Foto</span>
+                    <span class="text-[10px] mt-1">Requerido para certificar</span>
+                </div>
+                <img id="photoPreview" class="absolute inset-0 w-full h-full object-cover hidden">
+            </label>
         </div>
 
     </div>
 
-    <div class="mt-8 mb-4">
-        <button onclick="simularEnvio()" class="w-full bg-black text-white font-bold text-xl py-5 rounded-2xl hover:bg-gray-900 transition transform active:scale-95 shadow-lg">
-            Certificar en Blockchain
+    <div class="mt-4 mb-6 sticky bottom-4 z-20">
+        <button id="submitBtn" onclick="enviarCertificacion()" class="submit-btn">
+            <i class="fas fa-lock mr-2"></i> Certificar en Blockchain
         </button>
-        <p class="text-center text-[10px] text-gray-400 mt-4">Al certificar, se genera un Hash inmutable en Polygon.</p>
     </div>
 
     <script>
-        // Simulación de GPS
-        function getGPS() {
-            const btn = document.getElementById('gpsInput');
-            btn.value = "Buscando satélites...";
-            
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    // Éxito real
-                    btn.value = `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`;
-                    btn.classList.add('text-green-600', 'font-bold');
-                }, () => {
-                    // Fallo o denegado (Simulamos coordenadas de Paine para la demo)
-                    setTimeout(() => {
-                        btn.value = "-33.816667, -70.733333";
-                        btn.classList.add('text-green-600', 'font-bold');
-                    }, 1000);
-                });
-            } else {
-                btn.value = "-33.816667, -70.733333";
+        // ESTADO DE LA APP
+        const state = {
+            productor: "",
+            producto: "",
+            variedad: "",
+            gpsValido: false,
+            fotoValida: false,
+            coords: null
+        };
+
+        // 1. LÓGICA DE FOTO
+        function handlePhoto(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('photoPreview').src = e.target.result;
+                    document.getElementById('photoPreview').classList.remove('hidden');
+                    document.getElementById('photoPlaceholder').classList.add('hidden');
+                    
+                    // Validar
+                    document.getElementById('photoLabel').style.borderColor = "#10B981";
+                    state.fotoValida = true;
+                    validateForm();
+                }
+                reader.readAsDataURL(input.files[0]);
             }
         }
 
-        // Simulación de Envío con UI Feedback
-        function simularEnvio() {
-            const prod = document.getElementById('prodInput').value;
-            const gps = document.getElementById('gpsInput').value;
-
-            if(!prod || !gps) {
-                alert("Completa los datos primero.");
+        // 2. LÓGICA DE GPS (CON SIMULACIÓN INTELIGENTE PARA DEMO)
+        function capturarGPS() {
+            const select = document.getElementById('productorSelect');
+            if(!select.value) {
+                alert("Primero selecciona el Productor para saber qué zona validar.");
                 return;
             }
 
-            const btn = document.querySelector('button');
-            const originalText = btn.innerText;
+            const btn = document.getElementById('gpsBtn');
+            const status = document.getElementById('gpsStatus');
             
-            btn.innerText = "Firmando Transacción...";
-            btn.classList.add('bg-green-600');
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Triangulando Satélites...';
+            
+            // SIMULACIÓN DE VALIDACIÓN (En una app real, usaríamos navigator.geolocation)
+            setTimeout(() => {
+                // Obtenemos las coordenadas "correctas" del select para simular éxito
+                const latEsperada = parseFloat(select.options[select.selectedIndex].dataset.lat);
+                const lonEsperada = parseFloat(select.options[select.selectedIndex].dataset.lon);
+
+                // Generamos una variación mínima para que parezca real
+                const latReal = latEsperada + (Math.random() * 0.001);
+                const lonReal = lonEsperada + (Math.random() * 0.001);
+
+                state.coords = `${latReal.toFixed(6)}, ${lonReal.toFixed(6)}`;
+                state.gpsValido = true;
+
+                // UI Feedback
+                btn.className = "gps-btn active";
+                btn.innerHTML = `<i class="fas fa-check-circle"></i> Ubicación Validada`;
+                status.innerText = `GPS: ${state.coords} (Dentro del rango permitido)`;
+                status.classList.add('text-green-600', 'font-bold');
+                
+                validateForm();
+            }, 1500);
+        }
+
+        // 3. CEREBRO DE VALIDACIÓN (EL MIDDLEWARE)
+        function validateForm() {
+            state.productor = document.getElementById('productorSelect').value;
+            state.producto = document.getElementById('prodInput').value;
+            state.variedad = document.getElementById('varInput').value;
+
+            const errors = [];
+            const consoleDiv = document.getElementById('validationConsole');
+            const list = document.getElementById('errorList');
+
+            // REGLAS DE NEGOCIO
+            if (!state.productor) errors.push("Debes identificar el origen.");
+            if (state.producto.length < 3) errors.push("Nombre del producto muy corto.");
+            if (!state.gpsValido) errors.push("Falta validación satelital (GPS).");
+            if (!state.fotoValida) errors.push("La evidencia fotográfica es obligatoria.");
+
+            // Mostrar Errores
+            list.innerHTML = "";
+            if (errors.length > 0) {
+                // Botón Desactivado
+                document.getElementById('submitBtn').className = "submit-btn";
+                document.getElementById('submitBtn').disabled = true;
+                
+                // Mostrar alerta solo si ya interactuó
+                if(state.productor || state.producto) {
+                    consoleDiv.classList.remove('hidden');
+                    errors.forEach(err => {
+                        list.innerHTML += `<li>${err}</li>`;
+                    });
+                }
+            } else {
+                // TODO OK -> Botón Verde
+                consoleDiv.classList.add('hidden');
+                document.getElementById('submitBtn').className = "submit-btn ready";
+                document.getElementById('submitBtn').disabled = false;
+            }
+        }
+
+        // 4. ENVÍO FINAL
+        function enviarCertificacion() {
+            if(document.getElementById('submitBtn').disabled) return;
+
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerHTML;
+
+            // Animación de carga
+            btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Subiendo a Polygon...';
             
             setTimeout(() => {
-                btn.innerText = "¡Lote Certificado! 🎉";
-                setTimeout(() => {
-                    alert("En un entorno real, esto abriría MetaMask para confirmar la transacción.\n\nDatos listos para subir:\nProducto: " + prod + "\nGPS: " + gps);
-                    btn.innerText = originalText;
-                    btn.classList.remove('bg-green-600');
-                    document.getElementById('prodInput').value = "";
-                    document.getElementById('gpsInput').value = "";
-                }, 1000);
-            }, 1500);
+                alert(`✅ ¡CERTIFICADO EXITOSO!\n\nDatos inmutables:\n- Hash Transacción: 0x8a7...f9\n- GPS: ${state.coords}\n- Foto: QmX7... (IPFS)`);
+                
+                // Reset
+                window.location.reload();
+            }, 2000);
         }
     </script>
 </body>
