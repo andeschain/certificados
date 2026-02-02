@@ -1,98 +1,103 @@
-<script>
-        // ==========================================
-        // CONFIGURACIÓN
-        // ==========================================
-        const contractAddress = "0x064c8a8d123f03bb671addc55b46e00c43cb9"; 
-        // ==========================================
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificado | AndesChain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    
+    <style>
+        body { font-family: sans-serif; background: #f0fdf4; color: #1a2e05; }
+        .box { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; width: 100%; margin: 20px auto; text-align: center; }
+        .btn { background: #16a34a; color: white; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 15px; }
+    </style>
+</head>
+<body>
 
-        const abi = [
-            "function getLoteData(uint256 _loteId) public view returns (string memory)"
-        ];
+    <div class="box">
+        <h2 class="text-2xl font-bold mb-2">AndesChain</h2>
+        <p id="status" class="text-slate-500 animate-pulse">Conectando...</p>
+        
+        <div id="dataArea" class="hidden text-left mt-4 space-y-3 border-t pt-4">
+            <div>
+                <p class="text-xs text-slate-400 uppercase font-bold">Producto</p>
+                <p id="prod" class="text-xl font-bold text-green-700">...</p>
+            </div>
+            <div>
+                <p class="text-xs text-slate-400 uppercase font-bold">Ubicación</p>
+                <p id="loc">...</p>
+            </div>
+             <div>
+                <p class="text-xs text-slate-400 uppercase font-bold">Agricultor</p>
+                <p id="farmer">...</p>
+            </div>
+            <a id="mapBtn" href="#" target="_blank" class="btn w-full text-center">Ver Mapa Satelital</a>
+        </div>
+    </div>
 
-        let gmapsLink = ""; 
+    <script>
+        // --- ATRAPA ERRORES GLOBALES (Si falla la sintaxis, salta esto) ---
+        window.onerror = function(msg, url, line) {
+            alert("ERROR DE CÓDIGO:\n" + msg + "\n\nRevisa la línea " + line);
+            return true;
+        };
+
+        // ==============================================================
+        // ⚠️ PEGA TU DIRECCIÓN AQUÍ CON CUIDADO (MANTÉN LAS COMILLAS) ⚠️
+        const contractAddress = "0x064c8a8d123f03bb671addc55b46e00c43cb97dd"; 
+        // ==============================================================
+
+        const abi = ["function getLoteData(uint256 _loteId) public view returns (string memory)"];
 
         async function init() {
+            const statusEl = document.getElementById('status');
+            
             try {
-                // 1. Obtener ID
+                // 1. Validar que ethers cargó
+                if (typeof ethers === 'undefined') throw new Error("No se pudo cargar la librería Ethers. Revisa tu internet.");
+
+                // 2. Obtener ID (Por defecto 1)
                 const urlParams = new URLSearchParams(window.location.search);
-                let loteId = urlParams.get('id');
+                let loteId = urlParams.get('id') || "1";
 
-                // Si no hay ID, forzamos el 1
-                if (!loteId) {
-                    console.log("Sin ID, cargando default: 1");
-                    loteId = "1";
-                }
+                statusEl.innerText = `Consultando ID ${loteId}...`;
 
-                // 2. Conectar a Blockchain (Usamos ANKR que es más rápido)
-                // OJO: Si usaste la red de prueba "Amoy", cambia este link. 
-                // Asumo que estás en Polygon Mainnet.
-                const rpcUrl = "https://rpc.ankr.com/polygon"; 
-                
-                const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+                // 3. Conectar (Probamos Mainnet primero)
+                // Usamos un RPC muy estable de Cloudflare
+                const provider = new ethers.providers.JsonRpcProvider("https://polygon-bor-rpc.publicnode.com");
                 const contrato = new ethers.Contract(contractAddress, abi, provider);
 
-                // 3. Leer Datos con Timeout (Para que no se quede pegado infinito)
-                console.log(`📡 Llamando a Blockchain... ID: ${loteId}`);
-                document.querySelector('.animate-pulse').innerText = "Conectando satélite...";
-
-                // Creamos una promesa que falla si tarda más de 8 segundos
-                const timeout = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("Tiempo de espera agotado. La red Polygon está lenta.")), 8000)
-                );
-
-                const dataPromise = contrato.getLoteData(loteId);
+                // 4. Llamada
+                const jsonString = await contrato.getLoteData(loteId);
                 
-                // Carrera entre la data y el timeout
-                const jsonString = await Promise.race([dataPromise, timeout]);
-
-                // 4. Procesar
-                if (!jsonString) throw new Error("El contrato devolvió vacío. ¿El ID es correcto?");
-
-                console.log("✅ Datos recibidos:", jsonString);
+                // 5. Mostrar
                 const data = JSON.parse(jsonString);
                 
-                // 5. Mostrar en Pantalla
-                document.getElementById('productName').innerText = data.producto;
-                document.getElementById('brandName').innerText = data.marca;
-                document.getElementById('farmName').innerText = data.origen.predio;
-                document.getElementById('locationText').innerText = data.origen.zona;
-                document.getElementById('harvestDate').innerText = data.fechas.cosecha;
-                document.getElementById('variety').innerText = data.variedad;
-                document.getElementById('farmerName').innerText = data.agricultores;
-                document.getElementById('contractAddressDisplay').innerText = contractAddress;
-                gmapsLink = data.origen.gmaps;
+                document.getElementById('prod').innerText = data.producto;
+                document.getElementById('loc').innerText = data.origen.zona;
+                document.getElementById('farmer').innerText = data.agricultores;
+                document.getElementById('mapBtn').href = data.origen.gmaps;
 
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('certificate').classList.remove('hidden');
+                statusEl.innerText = "✅ Verificado en Blockchain";
+                statusEl.classList.remove('animate-pulse');
+                statusEl.classList.add('text-green-600', 'font-bold');
+                document.getElementById('dataArea').classList.remove('hidden');
 
             } catch (error) {
-                console.error("❌ ERROR CRÍTICO:", error);
-                
+                console.error(error);
                 let msg = error.message;
-                if (msg.includes("call revert")) msg = "El ID solicitado no existe en el contrato.";
-                if (msg.includes("code=")) msg = "Error de Red/Contrato (Revisa la Address).";
-
-                document.getElementById('loader').innerHTML = `
-                    <div class="bg-red-100 text-red-700 p-6 rounded-xl border border-red-300 shadow-lg">
-                        <h3 class="font-bold text-xl mb-2"><i class="fas fa-exclamation-triangle"></i> Error de Conexión</h3>
-                        <p class="font-mono text-sm mb-4 bg-white p-2 rounded border border-red-200">${msg}</p>
-                        <ul class="text-left text-sm list-disc pl-5 space-y-1">
-                            <li>¿Pegaste la Address correcta en el código?</li>
-                            <li>¿Estás seguro que subiste el ID ${loteId}?</li>
-                            <li>Abre la consola (F12) para ver detalles.</li>
-                        </ul>
-                    </div>`;
+                
+                // Traducción de errores comunes
+                if (msg.includes("call revert")) msg = "El ID no existe en el contrato.";
+                if (msg.includes("resolver")) msg = "Dirección de contrato inválida.";
+                
+                statusEl.innerHTML = `<span style='color:red'>❌ Error: ${msg}</span>`;
+                alert("Hubo un problema: " + msg);
             }
-        }
-
-        function openMap() {
-            if (gmapsLink) window.open(gmapsLink, '_blank');
-        }
-        
-        function copyHash() {
-            navigator.clipboard.writeText(contractAddress);
-            alert("Copiado!");
         }
 
         init();
     </script>
+</body>
+</html>
