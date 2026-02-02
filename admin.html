@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | AndesChain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style> body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; } </style>
+</head>
+<body class="flex min-h-screen">
+
+    <aside class="w-64 bg-white border-r border-gray-200 hidden md:flex flex-col p-6">
+        <div class="text-xl font-bold mb-10 text-green-700">AndesChain Admin</div>
+        <nav class="space-y-4 flex-1">
+            <a href="#" class="block bg-green-50 text-green-700 px-4 py-2 rounded-lg font-medium">Dashboard</a>
+            <a href="campo.html" class="block text-gray-500 px-4 py-2 hover:bg-gray-50 rounded-lg">App Recolector</a>
+            <a href="mercados.html" class="block text-gray-500 px-4 py-2 hover:bg-gray-50 rounded-lg">Ver Marketplace</a>
+        </nav>
+        <div class="text-xs text-gray-400">v.1.0 Demo FAO</div>
+    </aside>
+
+    <main class="flex-1 p-8">
+        <h1 class="text-2xl font-bold mb-6">Vista General</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="text-sm text-gray-400 font-bold uppercase">Total Lotes Certificados</p>
+                <p id="totalCount" class="text-4xl font-extrabold text-gray-900 mt-2">...</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="text-sm text-gray-400 font-bold uppercase">Estado de Red</p>
+                <div class="flex items-center gap-2 mt-2">
+                    <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                    <span class="text-xl font-bold text-gray-900">Polygon Mainnet</span>
+                </div>
+            </div>
+             <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <p class="text-sm text-gray-400 font-bold uppercase">Gas Fee Promedio</p>
+                <p class="text-4xl font-extrabold text-gray-900 mt-2">~$0.01</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-50 flex justify-between items-center">
+                <h3 class="font-bold">Última Actividad en Blockchain</h3>
+                <button onclick="loadStats()" class="text-xs bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-md transition">Refrescar</button>
+            </div>
+            <div class="p-6 text-center text-gray-500 text-sm" id="statusMsg">
+                Cargando datos del contrato...
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ==========================================
+        // ⚠️ PEGA TU ADDRESS AQUÍ ⚠️
+        const contractAddress = "0x064c8a8d123f03bb671addc55b46e00c43cb97dd"; 
+        // ==========================================
+
+        const abi = ["function nextId() public view returns (uint256)"];
+
+        async function loadStats() {
+            try {
+                // Proveedor RPC (Solo lectura)
+                const provider = new ethers.providers.JsonRpcProvider("https://polygon-bor-rpc.publicnode.com");
+                const contrato = new ethers.Contract(contractAddress, abi, provider);
+
+                // Obtener nextId
+                const nextId = await contrato.nextId();
+                const total = nextId.sub(1).toString(); // Restamos 1 porque el contador empieza en 1
+
+                document.getElementById('totalCount').innerText = total;
+                document.getElementById('statusMsg').innerText = `Sincronización completa. ${total} productos activos en la red.`;
+
+            } catch (error) {
+                console.error(error);
+                document.getElementById('statusMsg').innerText = "Error de conexión. Verifica la Address.";
+            }
+        }
+
+        loadStats();
+    </script>
+</body>
+</html>
