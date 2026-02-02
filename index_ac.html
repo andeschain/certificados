@@ -7,99 +7,113 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        /* ESTILO GENERAL "CLEAN" */
-        body { font-family: 'Inter', sans-serif; background-color: #FAFAFA; color: #111; }
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; color: #1F2937; }
         
         /* TARJETA PRINCIPAL */
         .card { 
             background: #FFFFFF; 
             border-radius: 24px; 
-            box-shadow: 0 4px 60px rgba(0,0,0,0.03); 
-            border: 1px solid #F0F0F0;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08); 
+            border: 1px solid #ffffff;
+            overflow: hidden;
         }
 
-        /* EFECTO MAPA (El truco B/N a Color) */
+        /* EFECTO MAPA (Grayscale interactivo) */
         .map-frame {
             filter: grayscale(100%) contrast(95%);
             transition: all 0.6s cubic-bezier(0.25, 0.8, 0.25, 1);
-            opacity: 0.9;
+            opacity: 0.85;
         }
-        .map-wrapper:hover .map-frame {
+        .map-container:hover .map-frame {
             filter: grayscale(0%) contrast(100%);
             opacity: 1;
         }
 
-        /* SPINNER MINIMALISTA */
-        .spinner { width: 24px; height: 24px; border: 3px solid #E5E7EB; border-top-color: #10B981; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        /* SPINNER */
+        .spinner { width: 30px; height: 30px; border: 3px solid #E5E7EB; border-top-color: #10B981; border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-6">
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-    <div id="loader" class="flex flex-col items-center gap-4">
+    <div id="loader" class="flex flex-col items-center gap-3">
         <div class="spinner"></div>
-        <p class="text-sm font-medium text-gray-400 animate-pulse">Sincronizando Blockchain...</p>
+        <p class="text-sm font-medium text-gray-500 animate-pulse">Consultando Blockchain...</p>
     </div>
 
-    <div id="content" class="hidden w-full max-w-[420px] animate-[fadeIn_0.5s_ease-out]">
+    <div id="content" class="hidden w-full max-w-[400px] animate-[fadeIn_0.5s_ease-out]">
         
-        <div class="card overflow-hidden relative">
+        <div class="card relative">
             
-            <div class="p-8 pb-6">
-                <div class="flex items-center gap-2 mb-4">
-                    <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span class="text-[10px] font-bold tracking-widest uppercase text-gray-400">Verificado en Polygon</span>
+            <div class="px-8 pt-8 pb-4">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 border border-green-100 mb-4">
+                    <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="text-[10px] font-bold tracking-widest uppercase text-green-700">Verificado en Polygon</span>
                 </div>
-                <h1 id="productName" class="text-3xl font-extrabold tracking-tight text-gray-900 leading-tight mb-1">...</h1>
-                <p id="brandName" class="text-lg text-gray-500 font-medium">...</p>
+                <h1 id="productName" class="text-3xl font-extrabold tracking-tight text-gray-900 leading-none mb-1">...</h1>
+                <p id="brandName" class="text-lg text-gray-400 font-medium">...</p>
             </div>
 
-            <div class="map-wrapper w-full h-64 bg-gray-100 relative group cursor-pointer overflow-hidden border-t border-b border-gray-100">
-                <iframe id="osmMap" class="map-frame w-full h-full border-0" scrolling="no" marginheight="0" marginwidth="0" src=""></iframe>
-                
-                <div class="absolute inset-0 flex items-center justify-center pointer-events-none group-hover:opacity-0 transition duration-500">
-                    <span class="bg-white/90 backdrop-blur px-4 py-2 rounded-full text-xs font-bold text-gray-600 shadow-sm">
-                        📍 Pasar mouse para color
-                    </span>
+            <div class="px-8 py-2">
+                <div class="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 border border-gray-100">
+                    <div class="text-4xl filter drop-shadow-sm">👨‍🌾</div>
+                    <div>
+                        <p class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Productor</p>
+                        <p id="farmerName" class="font-bold text-gray-800 text-lg leading-tight">...</p>
+                    </div>
                 </div>
+            </div>
+
+            <div class="px-8 py-4 grid grid-cols-2 gap-6">
+                <div>
+                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-1"><i class="far fa-calendar-alt"></i> Cosecha</p>
+                    <p id="harvestDate" class="font-semibold text-gray-800 text-sm">...</p>
+                </div>
+                <div>
+                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-1"><i class="fas fa-seedling"></i> Variedad</p>
+                    <p id="variety" class="font-semibold text-gray-800 text-sm">...</p>
+                </div>
+            </div>
+
+            <div class="map-container relative w-full h-48 bg-gray-200 border-t border-b border-gray-100 group cursor-pointer">
+                <iframe id="osmMap" class="map-frame w-full h-full border-0 pointer-events-none" scrolling="no"></iframe>
                 
-                <a id="gmapsBtn" href="#" target="_blank" class="absolute bottom-4 right-4 bg-white hover:bg-gray-50 text-gray-800 px-4 py-2 rounded-full text-xs font-bold shadow-lg transition opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0">
-                    Abrir Satélite ↗
+                <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 shadow-sm flex items-center gap-2">
+                    <i class="fas fa-map-marker-alt text-red-500"></i>
+                    <span id="locationText">...</span>
+                </div>
+
+                <a id="gmapsBtn" href="#" target="_blank" class="absolute inset-0 flex items-center justify-center bg-black/5 opacity-0 group-hover:opacity-100 transition duration-300">
+                    <span class="bg-white text-gray-900 px-4 py-2 rounded-full text-xs font-bold shadow-lg transform translate-y-2 group-hover:translate-y-0 transition">
+                        Ver en Google Maps ↗
+                    </span>
                 </a>
             </div>
 
-            <div class="p-8 grid grid-cols-2 gap-y-8 gap-x-4">
-                <div>
-                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Origen</p>
-                    <p id="farmName" class="font-semibold text-gray-800">...</p>
-                    <p id="locationText" class="text-xs text-gray-500">...</p>
+            <div class="bg-white p-6 text-center">
+                <div class="flex justify-center items-center gap-4 mb-6 opacity-60 grayscale hover:grayscale-0 transition duration-500">
+                    <div class="border border-gray-300 rounded px-2 py-1 flex items-center gap-2">
+                        <i class="fas fa-globe-americas text-blue-600"></i>
+                        <span class="text-[10px] font-bold text-gray-600">FAO Compatible</span>
+                    </div>
+                    <div class="border border-gray-300 rounded px-2 py-1 flex items-center gap-2">
+                        <i class="fas fa-certificate text-green-600"></i>
+                        <span class="text-[10px] font-bold text-gray-600">SIPAM Chiloé</span>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Agricultor</p>
-                    <p id="farmerName" class="font-semibold text-gray-800">...</p>
-                </div>
-                <div>
-                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Cosecha</p>
-                    <p id="harvestDate" class="font-semibold text-gray-800">...</p>
-                </div>
-                <div>
-                    <p class="text-[10px] uppercase font-bold text-gray-400 mb-1">Variedad</p>
-                    <p id="variety" class="font-semibold text-gray-800">...</p>
+
+                <div onclick="copyHash()" class="cursor-pointer group">
+                    <p class="text-[9px] uppercase font-bold text-gray-300 mb-1 group-hover:text-green-500 transition">Smart Contract Address</p>
+                    <code id="contractAddressDisplay" class="text-[10px] font-mono text-gray-400 bg-gray-50 px-2 py-1 rounded group-hover:bg-green-50 group-hover:text-green-700 transition">0x...</code>
                 </div>
             </div>
-
-            <div class="bg-gray-50 p-4 text-center border-t border-gray-100" onclick="copyHash()">
-                <p class="text-[9px] uppercase font-bold text-gray-400 mb-1">Smart Contract Address</p>
-                <code id="contractAddressDisplay" class="text-[10px] font-mono text-gray-500 cursor-pointer hover:text-green-600 transition">0x...</code>
-            </div>
         </div>
-
-        <div class="mt-8 text-center opacity-40 hover:opacity-100 transition">
-            <p class="text-[10px] font-medium text-gray-400">Tecnología AndesChain x Polygon</p>
-        </div>
+        
+        <p class="text-center text-[10px] text-gray-400 mt-6">Powered by AndesChain & Polygon PoS</p>
     </div>
 
     <script>
@@ -113,50 +127,50 @@
         async function init() {
             try {
                 const urlParams = new URLSearchParams(window.location.search);
-                let loteId = urlParams.get('id') || "1"; // Default ID 1
+                let loteId = urlParams.get('id') || "1";
 
-                // Usamos RPC estable
+                // Conexión Estable
                 const provider = new ethers.providers.JsonRpcProvider("https://polygon-bor-rpc.publicnode.com");
                 const contrato = new ethers.Contract(contractAddress, abi, provider);
 
-                // Llamada Blockchain
+                // Llamada
                 const jsonString = await contrato.getLoteData(loteId);
                 const data = JSON.parse(jsonString);
 
-                // --- LLENADO DE DATOS ---
+                // Llenado de Datos
                 document.getElementById('productName').innerText = data.producto;
                 document.getElementById('brandName').innerText = data.marca;
-                document.getElementById('farmName').innerText = data.origen.predio;
-                document.getElementById('locationText').innerText = data.origen.zona;
                 document.getElementById('farmerName').innerText = data.agricultores;
                 document.getElementById('harvestDate').innerText = data.fechas.cosecha;
                 document.getElementById('variety').innerText = data.variedad;
+                document.getElementById('locationText').innerText = data.origen.zona;
                 
-                // Address abreviada
-                document.getElementById('contractAddressDisplay').innerText = contractAddress;
+                // Formatear Address
+                const shortAddr = contractAddress.substring(0, 10) + "..." + contractAddress.substring(38);
+                document.getElementById('contractAddressDisplay').innerText = shortAddr;
 
-                // --- LÓGICA DEL MAPA (Embed Automático) ---
-                // Extraemos las coordenadas limpias (ej: "-33.8, -70.7")
+                // --- LOGICA MAPA INTELIGENTE ---
+                // 1. Limpiar coordenadas
                 const coordsRaw = data.origen.coords.replace(/\s/g, ''); 
                 const [lat, lon] = coordsRaw.split(',');
 
-                // Creamos un "Bounding Box" pequeño alrededor del punto para el zoom
-                const delta = 0.005; // Nivel de zoom
+                // 2. Calcular Bounding Box (Cuadro de zoom)
+                const delta = 0.008; // Zoom level
                 const bbox = `${parseFloat(lon)-delta},${parseFloat(lat)-delta},${parseFloat(lon)+delta},${parseFloat(lat)+delta}`;
 
-                // Generamos URL de OpenStreetMap Embed (Gratis y compatible)
+                // 3. Generar URL de OpenStreetMap
                 const embedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat},${lon}`;
                 
                 document.getElementById('osmMap').src = embedUrl;
-                document.getElementById('gmapsBtn').href = data.origen.gmaps; // Link externo a Google Maps
+                document.getElementById('gmapsBtn').href = data.origen.gmaps;
 
-                // Mostrar todo
+                // Mostrar
                 document.getElementById('loader').classList.add('hidden');
                 document.getElementById('content').classList.remove('hidden');
 
             } catch (error) {
                 console.error(error);
-                document.getElementById('loader').innerHTML = `<p class="text-red-500 font-bold text-sm">Error de conexión con Blockchain.</p>`;
+                document.getElementById('loader').innerHTML = `<p class="text-red-500 font-bold text-xs">Error de conexión</p>`;
             }
         }
 
