@@ -4,10 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificado de Trazabilidad | AndesChain</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <style>
         body { font-family: 'Outfit', sans-serif; background-color: #F8FAFC; color: #1e293b; }
         .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1); }
@@ -89,8 +93,7 @@
 
     <script>
         // ---------------------------------------------------------
-        // 1. CONFIGURACIÓN (¡PEGA TU ADDRESS AQUÍ!)
-        // ---------------------------------------------------------
+        // ⚠️ PEGA TU ADDRESS AQUÍ ABAJO ENTRE LAS COMILLAS ⚠️
         const contractAddress = "0x064c8a8d123f03bb671addc55b46e00c43cb9"; 
         // ---------------------------------------------------------
 
@@ -99,81 +102,26 @@
             "function getLoteData(uint256 _loteId) public view returns (string memory)"
         ];
 
-        let gmapsLink = ""; // Variable global para guardar el link del mapa
+        let gmapsLink = ""; 
 
         async function init() {
             try {
-                // 1. Obtener ID de la URL (ej: index.html?id=1)
+                // Obtener ID de la URL. IMPORTANTE: Usar ?id=1 (con el signo igual)
                 const urlParams = new URLSearchParams(window.location.search);
                 const loteId = urlParams.get('id');
 
                 if (!loteId) {
-                    alert("Error: No se especificó un ID de lote (ej: ?id=1)");
+                    // Si no hay ID, mostramos error pero detenemos spinner
+                    document.getElementById('loader').innerHTML = `<p class="text-slate-600">Por favor añade <b>?id=1</b> al final de la dirección web.</p>`;
                     return;
                 }
 
-                // 2. Conectar a Blockchain (Usamos un proveedor público de Polygon para lectura rápida)
-                // Si falla, intenta usar window.ethereum
-                let provider;
-                try {
-                    // Intento 1: Proveedor Público (No requiere MetaMask instalado)
-                    provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
-                } catch (e) {
-                    // Intento 2: MetaMask
-                    if (window.ethereum) {
-                        provider = new ethers.providers.Web3Provider(window.ethereum);
-                    }
-                }
-
-                if (!provider) {
-                    alert("Necesitas un navegador Web3 o conexión a internet.");
-                    return;
-                }
-
+                // Configurar Proveedor (Polygon Mainnet)
+                const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
                 const contrato = new ethers.Contract(contractAddress, abi, provider);
 
-                // 3. Leer Datos
+                // Leer Datos
                 console.log(`Consultando Lote ID: ${loteId}...`);
                 const jsonString = await contrato.getLoteData(loteId);
                 
-                if (!jsonString) {
-                    throw new Error("El lote no existe o está vacío.");
-                }
-
-                // 4. Parsear JSON
-                const data = JSON.parse(jsonString);
-                console.log("Datos recibidos:", data);
-
-                // 5. Rellenar UI
-                document.getElementById('productName').innerText = data.producto;
-                document.getElementById('brandName').innerText = data.marca;
-                document.getElementById('farmName').innerText = data.origen.predio;
-                document.getElementById('locationText').innerText = data.origen.zona;
-                document.getElementById('harvestDate').innerText = data.fechas.cosecha;
-                document.getElementById('variety').innerText = data.variedad;
-                document.getElementById('farmerName').innerText = data.agricultores;
-                document.getElementById('contractAddressDisplay').innerText = contractAddress.substring(0,6) + "..." + contractAddress.substring(38);
-
-                // Guardar link de mapa
-                gmapsLink = data.origen.gmaps;
-
-                // Mostrar
-                document.getElementById('loader').classList.add('hidden');
-                document.getElementById('certificate').classList.remove('hidden');
-
-            } catch (error) {
-                console.error(error);
-                document.getElementById('loader').innerHTML = `<p class="text-red-500 font-bold">Error al cargar: ${error.message}</p>`;
-            }
-        }
-
-        function openMap() {
-            if (gmapsLink) window.open(gmapsLink, '_blank');
-        }
-
-        // Iniciar al cargar
-        init();
-    </script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</body>
-</html>
+                if (!jsonString)
