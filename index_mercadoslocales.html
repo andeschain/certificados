@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MercadosLocales | Compras Públicas Certificadas</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #F8FAFC; color: #1e293b; }
+        
+        /* Estilo de Tarjeta de Producto */
+        .product-card {
+            background: white;
+            border-radius: 20px;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            position: relative;
+        }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: #cbd5e1;
+        }
+
+        .badge-verified {
+            background-color: #DCFCE7;
+            color: #15803d;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+    </style>
+</head>
+<body class="pb-20">
+
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <i class="fas fa-store text-green-600 text-xl"></i>
+                <span class="font-bold text-xl tracking-tight text-slate-900">MercadosLocales<span class="text-green-600">.lat</span></span>
+            </div>
+            <div class="hidden md:flex gap-6 text-sm font-medium text-slate-500">
+                <a href="#" class="hover:text-green-600">Catálogo B2G</a>
+                <a href="#" class="hover:text-green-600">Licitaciones</a>
+                <a href="#" class="hover:text-green-600">Proveedores</a>
+            </div>
+            <div>
+                <a href="#" class="bg-slate-900 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-slate-800 transition">
+                    Soy Comprador Público
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="max-w-7xl mx-auto px-6 py-16 text-center md:text-left">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-10">
+            <div class="md:w-1/2 space-y-6">
+                <div class="inline-block bg-blue-50 text-blue-700 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border border-blue-100">
+                    Plataforma Oficial
+                </div>
+                <h1 class="text-5xl md:text-6xl font-extrabold text-slate-900 leading-tight">
+                    Conectamos el Campo con el <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-400">Estado.</span>
+                </h1>
+                <p class="text-lg text-slate-500 md:pr-10">
+                    El primer marketplace de agricultura familiar con <strong>trazabilidad Blockchain</strong> verificada. Cumple metas de compras locales y sustentabilidad con un clic.
+                </p>
+                
+                <div class="relative max-w-md">
+                    <input type="text" class="w-full p-4 pl-12 rounded-xl border border-slate-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition shadow-sm" placeholder="Buscar: papas, lechugas, zona sur...">
+                    <i class="fas fa-search absolute left-4 top-5 text-slate-400"></i>
+                </div>
+                
+                <p class="text-xs text-slate-400 mt-2">
+                    <i class="fas fa-shield-alt mr-1"></i> Tecnología auditada por <strong>AndesChain</strong>.
+                </p>
+            </div>
+            
+            <div class="md:w-1/2 grid grid-cols-2 gap-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="text-3xl font-bold text-slate-900">1.2k</p>
+                    <p class="text-sm text-slate-500 font-medium">Productores Verificados</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                    <p class="text-3xl font-bold text-green-600">100%</p>
+                    <p class="text-sm text-slate-500 font-medium">Trazabilidad Inmutable</p>
+                </div>
+                <div class="col-span-2 bg-slate-900 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+                    <div class="relative z-10">
+                        <p class="text-lg font-bold">Programa FAO 2030</p>
+                        <p class="text-sm text-slate-400">Impulsando la agricultura familiar.</p>
+                    </div>
+                    <i class="fas fa-globe-americas absolute -bottom-4 -right-4 text-8xl text-slate-800 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="max-w-7xl mx-auto px-6 py-10">
+        <div class="flex justify-between items-end mb-8">
+            <h2 class="text-2xl font-bold text-slate-900">Productos Destacados</h2>
+            <a href="#" class="text-green-600 font-bold text-sm hover:underline">Ver todo el catálogo →</a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <div class="product-card group">
+                <div class="h-48 bg-gray-200 w-full relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1518977676601-b53f82aba655?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Papas" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold shadow-sm">
+                        RM, Paine
+                    </div>
+                </div>
+                
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="badge-verified"><i class="fas fa-check-circle"></i> AndesChain</span>
+                            <h3 class="text-xl font-bold text-slate-900 mt-1">Papas Nativas Desirée</h3>
+                        </div>
+                        <p class="text-lg font-bold text-slate-900">$850<span class="text-xs font-normal text-slate-500">/kg</span></p>
+                    </div>
+                    
+                    <p class="text-sm text-slate-500 mb-4">Cultivo agroecológico, sin químicos post-cosecha. Ideal para consumo escolar.</p>
+                    
+                    <div class="flex items-center gap-2 mb-6 border-t border-slate-100 pt-3">
+                        <div class="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center text-white text-xs">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-900">El Otro Huerto</p>
+                            <p class="text-[10px] text-slate-400">Cooperativa Certificada</p>
+                        </div>
+                    </div>
+
+                    <a href="index.html?id=1" target="_blank" class="block w-full text-center bg-white border border-slate-300 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 hover:border-slate-400 transition group-hover:bg-green-600 group-hover:text-white group-hover:border-green-600">
+                        Ver Certificado Digital
+                    </a>
+                </div>
+            </div>
+
+            <div class="product-card group">
+                <div class="h-48 bg-gray-200 w-full relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Tomates" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                    <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded text-xs font-bold shadow-sm">
+                        V, Limache
+                    </div>
+                </div>
+                
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="badge-verified"><i class="fas fa-check-circle"></i> AndesChain</span>
+                            <h3 class="text-xl font-bold text-slate-900 mt-1">Tomate Limachino</h3>
+                        </div>
+                        <p class="text-lg font-bold text-slate-900">$1.200<span class="text-xs font-normal text-slate-500">/kg</span></p>
+                    </div>
+                    
+                    <p class="text-sm text-slate-500 mb-4">Sabor antiguo, cosecha manual. Riego tecnificado con eficiencia hídrica.</p>
+                    
+                    <div class="flex items-center gap-2 mb-6 border-t border-slate-100 pt-3">
+                        <div class="w-8 h-8 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xs font-bold">
+                            MA
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-900">María Angélica</p>
+                            <p class="text-[10px] text-slate-400">Agricultora INDAP</p>
+                        </div>
+                    </div>
+
+                    <a href="index.html?id=2" target="_blank" class="block w-full text-center bg-white border border-slate-300 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-50 hover:border-slate-400 transition group-hover:bg-green-600 group-hover:text-white group-hover:border-green-600">
+                        Ver Certificado Digital
+                    </a>
+                </div>
+            </div>
+
+            <div class="product-card group opacity-75">
+                <div class="h-48 bg-gray-200 w-full relative overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1622206151226-18ca2c9ab4a1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Lechugas" class="w-full h-full object-cover grayscale">
+                    <div class="absolute inset-0 bg-white/50 flex items-center justify-center">
+                        <span class="bg-slate-900 text-white px-3 py-1 rounded font-bold text-sm">Agotado</span>
+                    </div>
+                </div>
+                
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="badge-verified bg-gray-100 text-gray-500"><i class="fas fa-lock"></i> Historial</span>
+                            <h3 class="text-xl font-bold text-slate-900 mt-1">Lechuga Hidropónica</h3>
+                        </div>
+                        <p class="text-lg font-bold text-slate-400">$600<span class="text-xs font-normal text-slate-500">/un</span></p>
+                    </div>
+                    
+                    <p class="text-sm text-slate-500 mb-4">Producidas sin suelo, ahorro 90% agua. Pack de 10 unidades para casinos.</p>
+                    
+                    <div class="flex items-center gap-2 mb-6 border-t border-slate-100 pt-3">
+                        <div class="w-8 h-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs font-bold">
+                            HP
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-900">HidroPaine Ltda.</p>
+                            <p class="text-[10px] text-slate-400">Pyme Rural</p>
+                        </div>
+                    </div>
+
+                    <button disabled class="block w-full text-center bg-gray-100 text-gray-400 font-bold py-3 rounded-xl cursor-not-allowed">
+                        Ver Certificado (Agotado)
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <footer class="text-center py-10 border-t border-slate-200 mt-10">
+        <p class="text-sm text-slate-400">© 2026 MercadosLocales.lat | Powered by <strong class="text-slate-600">AndesChain</strong></p>
+    </footer>
+
+</body>
+</html>
