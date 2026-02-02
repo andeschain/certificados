@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>App Recolector | AndesChain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #FFFFFF; }
+        /* Inputs estilo Fintual: Grandes, bordes suaves, focus claro */
+        .big-input {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 18px;
+            border-radius: 16px;
+            background-color: #F9FAFB;
+            border: 2px solid #F3F4F6;
+            outline: none;
+            transition: all 0.2s;
+            color: #111;
+        }
+        .big-input:focus { border-color: #10B981; background: #fff; }
+        .label { font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 8px; display: block; margin-left: 4px; }
+    </style>
+</head>
+<body class="p-6 max-w-md mx-auto min-h-screen flex flex-col">
+
+    <div class="flex justify-between items-center mb-8 pt-4">
+        <h1 class="text-2xl font-extrabold tracking-tight">Nuevo Lote</h1>
+        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold text-xs">A</div>
+    </div>
+
+    <div class="flex-1 space-y-6">
+        
+        <div>
+            <label class="label">¿Qué estás cosechando?</label>
+            <input type="text" class="big-input" placeholder="Ej: Manzanas Fuji" id="prodInput">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="label">Fecha</label>
+                <input type="text" class="big-input text-center" value="Hoy" readonly>
+            </div>
+            <div>
+                <label class="label">Lote ID</label>
+                <input type="text" class="big-input text-center text-gray-400" value="AUTO" readonly>
+            </div>
+        </div>
+
+        <div>
+            <label class="label">Ubicación del Huerto</label>
+            <div class="relative">
+                <input type="text" class="big-input pr-12" placeholder="Esperando GPS..." id="gpsInput" readonly>
+                <button onclick="getGPS()" class="absolute right-3 top-3 bg-white p-2 rounded-xl shadow-sm border border-gray-100 text-blue-500 hover:scale-110 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+            </div>
+            <p class="text-xs text-gray-400 mt-2 ml-2">Presiona el ícono para geolocalizar.</p>
+        </div>
+
+    </div>
+
+    <div class="mt-8 mb-4">
+        <button onclick="simularEnvio()" class="w-full bg-black text-white font-bold text-xl py-5 rounded-2xl hover:bg-gray-900 transition transform active:scale-95 shadow-lg">
+            Certificar en Blockchain
+        </button>
+        <p class="text-center text-[10px] text-gray-400 mt-4">Al certificar, se genera un Hash inmutable en Polygon.</p>
+    </div>
+
+    <script>
+        // Simulación de GPS
+        function getGPS() {
+            const btn = document.getElementById('gpsInput');
+            btn.value = "Buscando satélites...";
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((position) => {
+                    // Éxito real
+                    btn.value = `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(6)}`;
+                    btn.classList.add('text-green-600', 'font-bold');
+                }, () => {
+                    // Fallo o denegado (Simulamos coordenadas de Paine para la demo)
+                    setTimeout(() => {
+                        btn.value = "-33.816667, -70.733333";
+                        btn.classList.add('text-green-600', 'font-bold');
+                    }, 1000);
+                });
+            } else {
+                btn.value = "-33.816667, -70.733333";
+            }
+        }
+
+        // Simulación de Envío con UI Feedback
+        function simularEnvio() {
+            const prod = document.getElementById('prodInput').value;
+            const gps = document.getElementById('gpsInput').value;
+
+            if(!prod || !gps) {
+                alert("Completa los datos primero.");
+                return;
+            }
+
+            const btn = document.querySelector('button');
+            const originalText = btn.innerText;
+            
+            btn.innerText = "Firmando Transacción...";
+            btn.classList.add('bg-green-600');
+            
+            setTimeout(() => {
+                btn.innerText = "¡Lote Certificado! 🎉";
+                setTimeout(() => {
+                    alert("En un entorno real, esto abriría MetaMask para confirmar la transacción.\n\nDatos listos para subir:\nProducto: " + prod + "\nGPS: " + gps);
+                    btn.innerText = originalText;
+                    btn.classList.remove('bg-green-600');
+                    document.getElementById('prodInput').value = "";
+                    document.getElementById('gpsInput').value = "";
+                }, 1000);
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
