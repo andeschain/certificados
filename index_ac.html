@@ -1,103 +1,10 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Certificado de Trazabilidad | AndesChain</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    
-    <style>
-        body { font-family: 'Outfit', sans-serif; background-color: #F8FAFC; color: #1e293b; }
-        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1); }
-        .load-spinner { border: 4px solid #f3f3f3; border-top: 4px solid #16a34a; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
-
-    <div id="loader" class="text-center">
-        <div class="load-spinner mx-auto mb-4"></div>
-        <p class="text-slate-500 animate-pulse">Verificando en Blockchain...</p>
-    </div>
-
-    <div id="certificate" class="hidden w-full max-w-md bg-white rounded-3xl overflow-hidden shadow-2xl border border-slate-100 relative">
-        
-        <div class="bg-green-600 p-6 text-white text-center relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-            <div class="relative z-10">
-                <div class="inline-flex items-center gap-2 bg-green-700/50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 border border-green-400/30">
-                    <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                    Verificado en Blockchain
-                </div>
-                <h1 id="productName" class="text-3xl font-extrabold leading-tight">Cargando...</h1>
-                <p id="brandName" class="text-green-100 font-medium text-lg opacity-90">...</p>
-            </div>
-        </div>
-
-        <div class="p-6 space-y-6">
-
-            <div class="bg-slate-50 rounded-2xl p-1 border border-slate-100">
-                <div class="h-32 bg-slate-200 rounded-xl overflow-hidden relative group cursor-pointer" onclick="openMap()">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Google_Maps_Logo_2020.svg/512px-Google_Maps_Logo_2020.svg.png" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 opacity-50 group-hover:scale-110 transition">
-                    <div class="absolute bottom-2 left-2 bg-white/90 backdrop-blur px-3 py-1 rounded-lg text-xs font-bold shadow-sm">
-                        📍 <span id="locationText">Ubicación</span>
-                    </div>
-                </div>
-                <div class="p-3 flex justify-between items-center">
-                    <div>
-                        <p class="text-xs text-slate-400 uppercase font-bold">Origen del Lote</p>
-                        <p id="farmName" class="font-bold text-slate-700">Predio...</p>
-                    </div>
-                    <button onclick="openMap()" class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-blue-700 transition"><i class="fas fa-map-marker-alt"></i></button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                    <p class="text-xs text-slate-400 uppercase font-bold mb-1">Cosecha</p>
-                    <p id="harvestDate" class="font-bold text-slate-800 text-sm">...</p>
-                </div>
-                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                    <p class="text-xs text-slate-400 uppercase font-bold mb-1">Variedad</p>
-                    <p id="variety" class="font-bold text-slate-800 text-sm">...</p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 font-bold">
-                    👨‍🌾
-                </div>
-                <div>
-                    <p class="text-xs text-slate-400 uppercase font-bold">Productor Certificado</p>
-                    <p id="farmerName" class="font-bold text-slate-800">...</p>
-                </div>
-            </div>
-
-            <div class="border-t border-slate-100 pt-6 text-center">
-                <p class="text-xs text-slate-400 mb-2">ID Inmutable (Smart Contract)</p>
-                <div class="inline-block bg-slate-100 text-slate-500 px-3 py-1 rounded font-mono text-xs break-all cursor-pointer hover:bg-slate-200 transition" onclick="copyHash()" id="contractAddressDisplay">
-                    0x...
-                </div>
-                <div class="mt-6 flex justify-center opacity-50 grayscale hover:grayscale-0 transition">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/FAO_logo.svg/1200px-FAO_logo.svg.png" class="h-6">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // ---------------------------------------------------------
-        // ⚠️ PEGA TU ADDRESS AQUÍ ABAJO ENTRE LAS COMILLAS ⚠️
+<script>
+        // ==========================================
+        // CONFIGURACIÓN
+        // ==========================================
         const contractAddress = "0x064c8a8d123f03bb671addc55b46e00c43cb9"; 
-        // ---------------------------------------------------------
+        // ==========================================
 
-        // ABI Mínimo para leer
         const abi = [
             "function getLoteData(uint256 _loteId) public view returns (string memory)"
         ];
@@ -106,22 +13,86 @@
 
         async function init() {
             try {
-                // Obtener ID de la URL. IMPORTANTE: Usar ?id=1 (con el signo igual)
+                // 1. Obtener ID
                 const urlParams = new URLSearchParams(window.location.search);
-                const loteId = urlParams.get('id');
+                let loteId = urlParams.get('id');
 
+                // Si no hay ID, forzamos el 1
                 if (!loteId) {
-                    // Si no hay ID, mostramos error pero detenemos spinner
-                    document.getElementById('loader').innerHTML = `<p class="text-slate-600">Por favor añade <b>?id=1</b> al final de la dirección web.</p>`;
-                    return;
+                    console.log("Sin ID, cargando default: 1");
+                    loteId = "1";
                 }
 
-                // Configurar Proveedor (Polygon Mainnet)
-                const provider = new ethers.providers.JsonRpcProvider("https://polygon-rpc.com");
+                // 2. Conectar a Blockchain (Usamos ANKR que es más rápido)
+                // OJO: Si usaste la red de prueba "Amoy", cambia este link. 
+                // Asumo que estás en Polygon Mainnet.
+                const rpcUrl = "https://rpc.ankr.com/polygon"; 
+                
+                const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
                 const contrato = new ethers.Contract(contractAddress, abi, provider);
 
-                // Leer Datos
-                console.log(`Consultando Lote ID: ${loteId}...`);
-                const jsonString = await contrato.getLoteData(loteId);
+                // 3. Leer Datos con Timeout (Para que no se quede pegado infinito)
+                console.log(`📡 Llamando a Blockchain... ID: ${loteId}`);
+                document.querySelector('.animate-pulse').innerText = "Conectando satélite...";
+
+                // Creamos una promesa que falla si tarda más de 8 segundos
+                const timeout = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error("Tiempo de espera agotado. La red Polygon está lenta.")), 8000)
+                );
+
+                const dataPromise = contrato.getLoteData(loteId);
                 
-                if (!jsonString)
+                // Carrera entre la data y el timeout
+                const jsonString = await Promise.race([dataPromise, timeout]);
+
+                // 4. Procesar
+                if (!jsonString) throw new Error("El contrato devolvió vacío. ¿El ID es correcto?");
+
+                console.log("✅ Datos recibidos:", jsonString);
+                const data = JSON.parse(jsonString);
+                
+                // 5. Mostrar en Pantalla
+                document.getElementById('productName').innerText = data.producto;
+                document.getElementById('brandName').innerText = data.marca;
+                document.getElementById('farmName').innerText = data.origen.predio;
+                document.getElementById('locationText').innerText = data.origen.zona;
+                document.getElementById('harvestDate').innerText = data.fechas.cosecha;
+                document.getElementById('variety').innerText = data.variedad;
+                document.getElementById('farmerName').innerText = data.agricultores;
+                document.getElementById('contractAddressDisplay').innerText = contractAddress;
+                gmapsLink = data.origen.gmaps;
+
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('certificate').classList.remove('hidden');
+
+            } catch (error) {
+                console.error("❌ ERROR CRÍTICO:", error);
+                
+                let msg = error.message;
+                if (msg.includes("call revert")) msg = "El ID solicitado no existe en el contrato.";
+                if (msg.includes("code=")) msg = "Error de Red/Contrato (Revisa la Address).";
+
+                document.getElementById('loader').innerHTML = `
+                    <div class="bg-red-100 text-red-700 p-6 rounded-xl border border-red-300 shadow-lg">
+                        <h3 class="font-bold text-xl mb-2"><i class="fas fa-exclamation-triangle"></i> Error de Conexión</h3>
+                        <p class="font-mono text-sm mb-4 bg-white p-2 rounded border border-red-200">${msg}</p>
+                        <ul class="text-left text-sm list-disc pl-5 space-y-1">
+                            <li>¿Pegaste la Address correcta en el código?</li>
+                            <li>¿Estás seguro que subiste el ID ${loteId}?</li>
+                            <li>Abre la consola (F12) para ver detalles.</li>
+                        </ul>
+                    </div>`;
+            }
+        }
+
+        function openMap() {
+            if (gmapsLink) window.open(gmapsLink, '_blank');
+        }
+        
+        function copyHash() {
+            navigator.clipboard.writeText(contractAddress);
+            alert("Copiado!");
+        }
+
+        init();
+    </script>
